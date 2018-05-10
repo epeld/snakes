@@ -51,6 +51,12 @@ TURNING_Right = SnakeTurningRight()
 #
 class Snake(object):
     def __init__(self, position, heading, state=GOING_STRAIGHT):
+        if not isinstance(heading, geometry.Polar):
+            raise ValueError('Heading should be a Polar')
+
+        if not isinstance(heading, geometry.Cartesian):
+            raise ValueError('Position should be a Cartesian')
+
         self.history = CommitHistory()
         self.position = position
         self.heading = heading
@@ -86,7 +92,7 @@ Adds the new spatial configuration to history"""
     def calculate_spatial_commit(self, time_delta):
         heading = self.calculate_heading()
         position = self.calculate_position()
-        commit = SpatialCommit(position + heading * time_delta,
+        commit = SpatialCommit(position + heading.scale(time_delta).to_cartesian(),
                                self.state.update_heading(heading, time_delta))
 
     def get_last_synchronized_position(self):
