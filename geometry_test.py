@@ -20,6 +20,11 @@ class CartesianTest(unittest.TestCase):
         p = geometry.Cartesian(1.0, 1.0)
         self.assertTrue(p.get_length() - math.sqrt(2.0) < EPSILON)
 
+    def test_scale(self):
+        p = geometry.Cartesian(1.0, 1.0)
+        p2 = p.scale(3.5)
+        self.assertTrue(p.get_length() * 3.5 - p2.get_length() < EPSILON)
+
 
 class PolarTest(unittest.TestCase):
     def test_length(self):
@@ -51,9 +56,9 @@ class PolarTest(unittest.TestCase):
 
     def test_scale(self):
         v = geometry.Polar(1.0, math.pi/4)
-        v.scale(3.73)
-        self.assertEqual(v.get_length(), 3.73)
-        self.assertEqual(v.get_omega(), math.pi/4)
+        v2 = v.scale(3.73)
+        self.assertEqual(v2.get_length(), 3.73)
+        self.assertEqual(v2.get_omega(), math.pi/4)
 
     def test_copy(self):
         v = geometry.Polar(1.0, math.pi/4)
@@ -78,6 +83,7 @@ class PolarTest(unittest.TestCase):
 
     def test_scale2(self):
         v = geometry.Polar(3.73, math.pi/4)
-        v.scale(1 / 3.73)
-        self.assertTrue(v.get_length() - 1.0 < EPSILON)
-        self.assertEqual(v.get_omega(), math.pi/4)
+        v2 = v.scale(1 / 3.73)
+        self.assertTrue(v2.get_length() - 1.0 < EPSILON)
+        self.assertEqual(v2.get_omega(), math.pi/4)
+
