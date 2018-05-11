@@ -41,6 +41,9 @@ class Cartesian(object):
     def to_cartesian(self):
         return self.copy()
 
+    def to_tuple(self):
+        return (self.get_x(), self.get_y())
+
     def copy(self):
         return Cartesian(self.get_x(),
                          self.get_y())
@@ -78,3 +81,24 @@ class Polar(object):
         x = r * math.cos(omega)
         y = r * math.sin(omega)
         return Cartesian(x, y)
+
+
+class Rectangle(object):
+    def __init__(self, top_left, bottom_right):
+        self.top_left = top_left
+        self.bottom_right = bottom_right
+
+    def get_top_left(self):
+        return self.top_left
+
+    def get_bottom_right(self):
+        return self.bottom_right
+
+
+def centered_square(point, width):
+    height = width
+    left_top = point - Cartesian(point.get_x() - width / 2.0,
+                                 point.get_y() - height / 2.0)
+    right_bottom = point + Cartesian(point.get_x() + width / 2.0,
+                                     point.get_y() + height / 2.0)
+    return Rectangle(left_top, right_bottom)
