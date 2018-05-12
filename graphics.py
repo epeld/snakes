@@ -1,8 +1,13 @@
 import pygame, sys
+import colors
 from pygame.locals import *
 
 SNAKE_WIDTH = 32 # The width of the snake body (in pixels)
-TRANSPARENT = (0,0,0,0) # A fully transparent RGBA-value
+
+def create_display():
+    display = pygame.display.set_mode((640,480),0,32)
+    display.fill(colors.WHITE)
+    return display
 
 def pygame_rect(rect):
     "Convert a geometry-rect to a pygame-Rect"
@@ -24,7 +29,7 @@ class GraphicsContext(object):
 
     def clear(self):
         "Clear the bitmap, making it fully transparent once more"
-        self.surface.fill(TRANSPARENT)
+        self.surface.fill(colors.TRANSPARENT)
 
     def draw_point(self, pt, color):
         "Draw a snake position with a given color"
