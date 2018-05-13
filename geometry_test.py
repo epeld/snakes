@@ -140,3 +140,12 @@ class RectangleTest(unittest.TestCase):
         self.assertEqual(r.get_width(), 10)
         self.assertEqual(r.get_height(), 1)
 
+    def test_centered_square(self):
+        r = geometry.centered_square(
+            geometry.c(0,0),
+            10
+        )
+        self.assertEqual(r.get_width(), 10)
+        self.assertEqual(r.get_height(), 10)
+        self.assertEqual(r.get_top_left(), geometry.c(-5, -5))
+        self.assertEqual(r.get_bottom_right(), geometry.c(5, 5))
