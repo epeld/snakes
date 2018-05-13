@@ -1,5 +1,6 @@
 import pygame, sys
 import colors
+import geometry
 from pygame.locals import *
 
 SNAKE_WIDTH = 32 # The width of the snake body (in pixels)
@@ -7,15 +8,23 @@ SNAKE_WIDTH = 32 # The width of the snake body (in pixels)
 def create_display():
     display = pygame.display.set_mode((640,480),0,32)
     display.fill(colors.WHITE)
+    pygame.display.update()
     return display
 
 def pygame_rect(rect):
     "Convert a geometry-rect to a pygame-Rect"
     return pygame.Rect(
         rect.get_top_left().to_tuple(),
-        rect.get_bottom_right().to_tuple(),
+        (rect.get_width(), rect.get_height())
     )
 
+def draw_point(surface, pt, color):
+    "Draw a snake position with a given color"
+    rect = geometry.centered_square(pt, SNAKE_WIDTH)
+    surface.fill(
+        color,
+        pygame_rect(rect)
+    )
 
 class GraphicsContext(object):
     "I represent a transparent bitmap and an API for drawing on top of that"
