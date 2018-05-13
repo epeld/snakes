@@ -1,33 +1,22 @@
 import random
-import math
 
-def event_milliseconds(event):
-    return event[0]
+import communications
+import geometry
 
-def rect_event(n):
-    black = (200,0,0)
-    x = n * 50
-    y = 250 + 30 * math.sin(n * math.pi / 5)
-    w = 50
-    h = 50
-    return (n * 1000,x,y,w,h,black)
+class SimulatedServerConnection(object):
+    """I simulate a communications with a server"""
+    def receive_updates(self):
+        return [
+            communications.RectangleUpdate(
+                geometry.Cartesian(
+                    640 * random.random(),
+                    480 * random.random()
+                ),
+                (255 * random.random(),
+                 255 * random.random(),
+                 255 * random.random())
+            )
+        ]
 
-
-events = []
-
-def setup():
-    global events
-    events.extend([rect_event(i) for i in range(30)][::-1])
-
-
-def get_events(ms):
-    global events
-    r = []
-    while events:
-        event = events[-1]
-        if event_milliseconds(event) < ms:
-            events.pop()
-            r.append(event)
-        else:
-            break
-    return r
+    def send_events(self, _):
+        pass

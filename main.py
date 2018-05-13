@@ -1,31 +1,36 @@
 import pygame, sys
 from pygame.locals import *
+import random
 
 import colors
-import geometry
-import time_utils
 import game as gm
 import graphics as gfx
-
-def process_events(game):
-    for event in pygame.event.get():
-        if event.type==QUIT:
-            game.set_done()
+import geometry
+import events
+import simulation
 
 
 def main():
     pygame.init()
 
+    comms = simulation.SimulatedServerConnection()
     game = gm.Game()
     display = gfx.create_display()
     while not game.get_done():
-        process_events(game)
-        pygame.display.update()
+        pending = events.process_events(game)
+        comms.send_events(pending)
 
-        pygame.time.wait(500)
+        updates = comms.receive_updates()
+        if updates:
+            for update in updates:
+                pt = update.get_point()
+                color = update.get_color()
+                gfx.draw_point(display, pt, color)
+            pygame.display.update()
+
+        pygame.time.wait(50)
 
     pygame.quit()
-    sys.exit()
 
 
 main()
