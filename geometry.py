@@ -124,7 +124,7 @@ class Rectangle(object):
 
 def centered_square(point, width):
     height = width
-    left_top = point - Cartesian(point.get_x() - width / 2.0,
+    left_top = point + Cartesian(point.get_x() - width / 2.0,
                                  point.get_y() - height / 2.0)
     right_bottom = point + Cartesian(point.get_x() + width / 2.0,
                                      point.get_y() + height / 2.0)
