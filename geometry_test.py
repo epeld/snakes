@@ -87,3 +87,56 @@ class PolarTest(unittest.TestCase):
         self.assertTrue(v2.get_length() - 1.0 < EPSILON)
         self.assertEqual(v2.get_omega(), math.pi/4)
 
+
+class RectangleTest(unittest.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(
+            geometry.Cartesian,
+            lambda a,b,msg: self.assertTupleEqual(a.to_tuple(),
+                                                  b.to_tuple(),
+                                                  msg)
+        )
+
+    def test_rectangle_point_ordering(self):
+        "Test that constructor argument ordering shouldn't matter"
+        r = geometry.Rectangle(
+            geometry.Cartesian(0,0),
+            geometry.Cartesian(1,1)
+        )
+        r2 = geometry.Rectangle(
+            geometry.Cartesian(1,1),
+            geometry.Cartesian(0,0)
+        )
+        self.assertEqual(r.get_top_left(), r.get_top_left())
+        self.assertEqual(r.get_bottom_right(), r.get_bottom_right())
+
+    def test_rectangle(self):
+        r = geometry.Rectangle(
+            geometry.c(0,0),
+            geometry.c(1,1)
+        )
+        self.assertEqual(r.get_top_left(), geometry.c(0,0))
+        self.assertEqual(r.get_bottom_right(), geometry.c(1,1))
+        self.assertEqual(r.get_width(), 1)
+        self.assertEqual(r.get_height(), 1)
+
+
+    def test_translated_rectangle(self):
+        r = geometry.Rectangle(
+            geometry.c(1,1),
+            geometry.c(2,2)
+        )
+        self.assertEqual(r.get_top_left(), geometry.c(1,1))
+        self.assertEqual(r.get_bottom_right(), geometry.c(2,2))
+        self.assertEqual(r.get_width(), 1)
+        self.assertEqual(r.get_height(), 1)
+
+
+    def test_wide_rectangle(self):
+        r = geometry.Rectangle(
+            geometry.c(1, 1),
+            geometry.c(11, 2)
+        )
+        self.assertEqual(r.get_width(), 10)
+        self.assertEqual(r.get_height(), 1)
+
