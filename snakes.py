@@ -87,7 +87,7 @@ class FifoQueue(object):
 
 
 def main():
-    pygame.init()
+    pygame.display.init()
 
     player = Player()
     players = [player]
