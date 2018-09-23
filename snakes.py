@@ -44,6 +44,22 @@ class Player(object):
         self.turning = None
 
 
+class FifoQueue(object):
+    def __init__(self):
+        self.items = []
+
+    def put(self, item):
+        self.items.append(item)
+
+    def get(self):
+        item = self.items[0]
+        self.items = items[1:]
+        return item
+
+    def is_empty(self):
+        return len(self.items)
+
+
 def main():
     pygame.init()
 
