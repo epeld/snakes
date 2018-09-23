@@ -71,7 +71,8 @@ def main():
     DISPLAY.fill(WHITE)
 
     start_ticks = pygame.time.get_ticks()
-    while True:
+    exit = False
+    while not exit:
         for event in pygame.event.get():
             if event.type==QUIT:
                 pygame.quit()
@@ -84,6 +85,8 @@ def main():
                 elif event.key == K_SPACE:
                     DISPLAY.fill(WHITE)
                     player.reset()
+                elif event.key == K_ESCAPE:
+                    exit = True
             elif event.type == KEYUP:
                 player.stop_turning()
 
