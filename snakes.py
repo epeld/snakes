@@ -53,11 +53,17 @@ class FifoQueue(object):
 
     def get(self):
         item = self.items[0]
-        self.items = items[1:]
+        self.items = self.items[1:]
         return item
+
+    def size(self):
+        return len(self.items)
 
     def is_empty(self):
         return len(self.items)
+
+    def get_items(self):
+        return self.items
 
 
 def main():
