@@ -3,7 +3,21 @@ import random
 import math
 from pygame.locals import *
 
-WHITE=(255,255,255)
+WHITE=pygame.color.Color(255,255,255)
+TRANSPARENT_COLOR=pygame.color.Color(255,255,255, 0)
+
+
+def are_same_color(c1, c2):
+    return c1.r == c2.r and c1.g == c2.g and c1.b == c2.b
+
+def rect_corners(rect):
+    x, y, w, h = rect
+    return [
+        (x, y),
+        (x + w, y),
+        (x, y + h),
+        (x + w, y + h)
+    ]
 
 class Player(object):
     def __init__(self):
@@ -37,8 +51,14 @@ class Player(object):
     def stop_turning(self):
         self.turning = None
 
+    def is_dead(self):
+        return self.dead
+
+    def set_dead(self, b):
+        self.dead = b
 
     def reset(self):
+        self.dead = False
         self.pos = (50, 100)
         self.heading = 0
         self.turning = None
@@ -77,10 +97,12 @@ def main():
     # Set up display
     DEPTH=32
     DISPLAY=pygame.display.set_mode((640,480),0,DEPTH)
-    OVERLAY=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
+    COMMITTED_RECTS=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
+    TEMPORARY_RECTS=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
 
     BACKGROUND_COLOR=WHITE
     DISPLAY.fill(BACKGROUND_COLOR)
+    COMMITTED_RECTS.fill(TRANSPARENT_COLOR)
 
     start_ticks = pygame.time.get_ticks()
     exit = False
@@ -102,10 +124,12 @@ def main():
             elif event.type == KEYUP:
                 player.stop_turning()
 
-        player.update(speed=2)
+        for p in players:
+            if not p.is_dead():
+                player.update(speed=2)
 
         # Generate the new rectangles for each player
-        rts = [p.rect(10) for p in players]
+        rts = [p.rect(8) for p in players if not p.is_dead()]
         recent_rects.put(rts)
 
         # player rects older than 10 generations get
@@ -113,21 +137,32 @@ def main():
         if recent_rects.size() > 10:
             oldest_player_rects = recent_rects.get()
             for rt in oldest_player_rects:
-                pygame.draw.rect(DISPLAY,(100,200,250), rt)
+                pygame.draw.rect(COMMITTED_RECTS,(100,200,250), rt)
 
         # redraw overlay
-        OVERLAY.fill((255,255,255,0)) #transparent
+        TEMPORARY_RECTS.fill(TRANSPARENT_COLOR)
         for generation in recent_rects.get_items():
             for rt in generation:
-                pygame.draw.rect(OVERLAY,(200,100,50), rt)
-        DISPLAY.blit(OVERLAY, (0,0))
+                pygame.draw.rect(TEMPORARY_RECTS,(200,100,50), rt)
 
-        # DISPLAY.lock()
-        # color = tuple(DISPLAY.get_at((int(rt[0]), int(rt[1]))))
-        # if tuple(DISPLAY.get_at((int(rt[0]), int(rt[1])))) != BACKGROUND_COLOR:
-        #     print("INTERSECT")
-        #     print(color)
-        # DISPLAY.unlock()
+        DISPLAY.blit(COMMITTED_RECTS, (0,0))
+        DISPLAY.blit(TEMPORARY_RECTS, (0,0))
+
+        COMMITTED_RECTS.lock()
+        for p in players:
+            if p.is_dead():
+                continue
+            for pt in rect_corners(rt):
+                x = int(pt[0])
+                y = int(pt[1])
+                color = COMMITTED_RECTS.get_at((x, y))
+                if not are_same_color(color, TRANSPARENT_COLOR):
+                    print(color)
+                    print(TRANSPARENT_COLOR)
+                    pygame.draw.rect(COMMITTED_RECTS,(250,0,0), (x,y, 3, 3))
+                    p.set_dead(True)
+                    print("DEAD")
+        COMMITTED_RECTS.unlock()
 
         pygame.display.update()
 
