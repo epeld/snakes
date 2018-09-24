@@ -4,6 +4,7 @@ import math
 from pygame.locals import *
 
 WHITE=pygame.color.Color(255,255,255)
+BLACK=pygame.color.Color(0,0,0)
 TRANSPARENT_COLOR=pygame.color.Color(255,255,255, 0)
 
 def darken(color):
@@ -147,15 +148,18 @@ def main():
     # Set up display
     DEPTH=32
     DISPLAY=pygame.display.set_mode((640,480),0,DEPTH)
-    COMMITTED_RECTS=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
     TEMPORARY_RECTS=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
+    BACKBUFFER=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
+    COLLISION_MASK=pygame.surface.Surface(DISPLAY.get_size(),0,8)
 
     BACKGROUND_COLOR=WHITE
+    COLLISION_MASK.fill(WHITE)
     DISPLAY.fill(BACKGROUND_COLOR)
-    COMMITTED_RECTS.fill(TRANSPARENT_COLOR)
+    BACKBUFFER.fill(BACKGROUND_COLOR)
 
     start_ticks = pygame.time.get_ticks()
     exit = False
+    show_collision_mask = False
     while not exit:
         for event in pygame.event.get():
             if event.type==QUIT:
@@ -171,6 +175,8 @@ def main():
                     player.reset()
                 elif event.key == K_ESCAPE:
                     exit = True
+                elif event.key == K_TAB:
+                    show_collision_mask = not show_collision_mask
             elif event.type == KEYUP:
                 player.stop_turning()
 
@@ -179,7 +185,7 @@ def main():
                 player.update(speed=2)
 
         # Generate the new rectangles for each player
-        rts = [p.rect(8) for p in players if not p.is_dead()]
+        rts = [p.rect(6) for p in players if not p.is_dead()]
         recent_rects.put(rts)
 
         # player rects older than 10 generations get
@@ -191,7 +197,8 @@ def main():
                     c = player.get_hole_color()
                 else:
                     c = player.get_color()
-                pygame.draw.rect(COMMITTED_RECTS,c, rt)
+                    pygame.draw.rect(COLLISION_MASK, BLACK, rt)
+                pygame.draw.rect(BACKBUFFER, c, rt)
 
         # redraw overlay
         TEMPORARY_RECTS.fill(TRANSPARENT_COLOR)
@@ -200,24 +207,26 @@ def main():
                 c = player.get_head_color()
                 pygame.draw.rect(TEMPORARY_RECTS,c, rt)
 
-        DISPLAY.blit(COMMITTED_RECTS, (0,0))
+        if show_collision_mask:
+            DISPLAY.blit(COLLISION_MASK, (0,0))
+        else:
+            DISPLAY.blit(BACKBUFFER, (0,0))
         DISPLAY.blit(TEMPORARY_RECTS, (0,0))
 
-        COMMITTED_RECTS.lock()
+        COLLISION_MASK.lock()
         for p in players:
             if p.is_dead():
                 continue
             for pt in rect_corners(rt):
                 x = int(pt[0])
                 y = int(pt[1])
-                color = COMMITTED_RECTS.get_at((x, y))
-                if not are_same_color(color, TRANSPARENT_COLOR):
+                color = COLLISION_MASK.get_at((x, y))
+                if not are_same_color(color, WHITE):
                     print(color)
-                    print(TRANSPARENT_COLOR)
-                    pygame.draw.rect(COMMITTED_RECTS,(250,0,0), (x,y, 3, 3))
+                    pygame.draw.rect(BACKBUFFER,(250,0,0), (x, y, 3, 3))
                     p.set_dead(True)
                     print("DEAD")
-        COMMITTED_RECTS.unlock()
+        COLLISION_MASK.unlock()
 
         pygame.display.update()
 
