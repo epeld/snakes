@@ -139,6 +139,7 @@ class FifoQueue(object):
 
 def main():
     pygame.display.init()
+    pygame.font.init()
 
     player = Player()
     players = [player]
@@ -156,6 +157,13 @@ def main():
     COLLISION_MASK.fill(WHITE)
     DISPLAY.fill(BACKGROUND_COLOR)
     BACKBUFFER.fill(BACKGROUND_COLOR)
+
+    for f in pygame.font.get_fonts():
+        print("Font available: {0}".format(f))
+    font = pygame.font.SysFont(next(f for f in pygame.font.get_fonts() if 'roman' in f), 50)
+    game_over = font.render("GAME OVER", True, BLACK)
+    game_over_rt = game_over.get_rect()
+    game_over_rt.center = DISPLAY.get_rect().center
 
     start_ticks = pygame.time.get_ticks()
     exit = False
@@ -212,6 +220,9 @@ def main():
         else:
             DISPLAY.blit(BACKBUFFER, (0,0))
         DISPLAY.blit(TEMPORARY_RECTS, (0,0))
+
+        if all(p.is_dead() for p in players):
+            DISPLAY.blit(game_over, game_over_rt.topleft)
 
         COLLISION_MASK.lock()
         for p in players:
