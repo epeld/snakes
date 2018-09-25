@@ -158,10 +158,8 @@ def main():
     DISPLAY.fill(BACKGROUND_COLOR)
     BACKBUFFER.fill(BACKGROUND_COLOR)
 
-    for f in pygame.font.get_fonts():
-        print("Font available: {0}".format(f))
     font = pygame.font.SysFont(next(f for f in pygame.font.get_fonts() if 'roman' in f), 50)
-    game_over = font.render("GAME OVER", True, BLACK)
+    game_over = font.render("HE DED.", True, BLACK)
     game_over_rt = game_over.get_rect()
     game_over_rt.center = DISPLAY.get_rect().center
 
@@ -233,10 +231,8 @@ def main():
                 y = int(pt[1])
                 color = COLLISION_MASK.get_at((x, y))
                 if not are_same_color(color, WHITE):
-                    print(color)
                     BACKBUFFER.fill((250,0,0), (x, y, 3, 3))
                     p.set_dead(True)
-                    print("DEAD")
         COLLISION_MASK.unlock()
 
         pygame.display.update()
