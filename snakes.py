@@ -197,15 +197,15 @@ def main():
                     c = player.get_hole_color()
                 else:
                     c = player.get_color()
-                    pygame.draw.rect(COLLISION_MASK, BLACK, rt)
-                pygame.draw.rect(BACKBUFFER, c, rt)
+                    COLLISION_MASK.fill(BLACK, rt)
+                BACKBUFFER.fill(c, rt)
 
         # redraw overlay
         TEMPORARY_RECTS.fill(TRANSPARENT_COLOR)
         for generation in recent_rects.get_items():
             for rt in generation:
                 c = player.get_head_color()
-                pygame.draw.rect(TEMPORARY_RECTS,c, rt)
+                TEMPORARY_RECTS.fill(c, rt)
 
         if show_collision_mask:
             DISPLAY.blit(COLLISION_MASK, (0,0))
@@ -223,7 +223,7 @@ def main():
                 color = COLLISION_MASK.get_at((x, y))
                 if not are_same_color(color, WHITE):
                     print(color)
-                    pygame.draw.rect(BACKBUFFER,(250,0,0), (x, y, 3, 3))
+                    BACKBUFFER.fill((250,0,0), (x, y, 3, 3))
                     p.set_dead(True)
                     print("DEAD")
         COLLISION_MASK.unlock()
