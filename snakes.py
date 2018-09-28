@@ -17,9 +17,9 @@ def darken(color):
 
 def lighten(color):
     return pygame.color.Color(
-        min(255, round(color.r * 1.5)),
-        min(255, round(color.g * 1.5)),
-        min(255, round(color.b * 1.5))
+        max(150, min(255, round(color.r * 2))),
+        max(150, min(255, round(color.g * 2))),
+        max(150, min(255, round(color.b * 2)))
     )
 
 def are_same_color(c1, c2):
@@ -59,12 +59,12 @@ class VaryingWormStateInterval(object):
 class ColorWheel(object):
     def __init__(self):
         self.colors = [
-            pygame.color.Color(255, 0, 0),
-            pygame.color.Color(0, 255, 0),
-            pygame.color.Color(0, 0, 255),
+            pygame.color.Color(200, 0, 0),
+            pygame.color.Color(0, 200, 0),
+            pygame.color.Color(0, 0, 200),
             pygame.color.Color(100, 100, 100),
-            pygame.color.Color(50, 100, 200),
-            pygame.color.Color(200, 100, 50)
+            pygame.color.Color(50, 100, 150),
+            pygame.color.Color(150, 100, 50)
         ]
         self.index = 0
 
