@@ -6,6 +6,7 @@ from pygame.locals import *
 WHITE=pygame.color.Color(255,255,255)
 BLACK=pygame.color.Color(0,0,0)
 TRANSPARENT_COLOR=pygame.color.Color(255,255,255, 0)
+BACKGROUND_COLOR=WHITE
 
 def darken(color):
     return pygame.color.Color(
@@ -137,6 +138,26 @@ class FifoQueue(object):
         return self.items
 
 
+class CountdownState(object):
+    def __init__(self):
+        self.started = False
+
+    def did_finish(self, updated_time):
+        return self.get_count(updated_time) == 0
+
+    def start(self, start_time):
+        self.started = True
+        self.start_time = start_time
+
+    def did_start(self):
+        return self.started
+
+    def get_count(self, updated_time):
+        INITIAL_COUNT = 3
+        if not self.started:
+            return INITIAL_COUNT
+        return max(0, INITIAL_COUNT - math.ceil((updated_time - self.start_time) / 1000))
+
 def main():
     pygame.display.init()
     pygame.font.init()
@@ -153,20 +174,25 @@ def main():
     BACKBUFFER=pygame.surface.Surface(DISPLAY.get_size(),SRCALPHA,DEPTH)
     COLLISION_MASK=pygame.surface.Surface(DISPLAY.get_size(),0,8)
 
-    BACKGROUND_COLOR=WHITE
     COLLISION_MASK.fill(WHITE)
     DISPLAY.fill(BACKGROUND_COLOR)
     BACKBUFFER.fill(BACKGROUND_COLOR)
 
+    # Font stuff
     font = pygame.font.SysFont(next(f for f in pygame.font.get_fonts() if 'roman' in f), 50)
     game_over = font.render("HE DED.", True, BLACK)
     game_over_rt = game_over.get_rect()
     game_over_rt.center = DISPLAY.get_rect().center
 
+    digits = [font.render(str(i), True, BLACK) for i in range(1, 4)]
+
+    countdown = CountdownState()
+
     start_ticks = pygame.time.get_ticks()
     exit = False
     show_collision_mask = False
     while not exit:
+        current_time = pygame.time.get_ticks()
         for event in pygame.event.get():
             if event.type==QUIT:
                 pygame.quit()
@@ -222,6 +248,9 @@ def main():
         if all(p.is_dead() for p in players):
             DISPLAY.blit(game_over, game_over_rt.topleft)
 
+        if not countdown.did_finish(current_time):
+            countdown_loop(digits, TEMPORARY_RECTS, countdown)
+
         COLLISION_MASK.lock()
         for p in players:
             if p.is_dead():
@@ -239,6 +268,35 @@ def main():
 
         pygame.time.wait(10)
 
+
+def countdown_loop(digits, background, countdown):
+    DISPLAY = pygame.display.get_surface()
+    while True:
+        current_time = pygame.time.get_ticks()
+        for event in pygame.event.get():
+            if event.type==QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    sys.exit()
+                elif not countdown.did_start():
+                    countdown.start(current_time);
+
+        if countdown.did_finish(current_time):
+            return
+
+        DISPLAY.fill(BACKGROUND_COLOR)
+        DISPLAY.blit(background, (0,0))
+        digit = digits[countdown.get_count(current_time) - 1]
+
+        rt = digit.get_rect()
+        rt.center = DISPLAY.get_rect().center
+
+        DISPLAY.blit(digit, rt)
+        pygame.display.update()
+
+        pygame.time.wait(100)
 
 main()
 
