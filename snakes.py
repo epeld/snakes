@@ -76,19 +76,21 @@ class ColorWheel(object):
 
 color_wheel = ColorWheel()
 
-def random_position_from_screen_rect(rect):
+def random_player_from_screen_rect(rect, color):
     center = rect.center
     radius = 0.8 * min(rect.width, rect.height) / 2
 
     theta = random.random() * 2 * math.pi
     x = radius * math.cos(theta)
     y = radius * math.sin(theta)
-    return (x + center[0], y + center[1])
+    pos = (x + center[0], y + center[1])
+    return Player(pos, theta + math.pi, color)
 
 
 class Player(object):
-    def __init__(self, pos, color):
+    def __init__(self, pos, theta, color):
         self.original_pos = pos
+        self.original_theta = theta
         self.reset()
         self.color = color
         self.state = VaryingWormStateInterval()
@@ -143,7 +145,7 @@ class Player(object):
     def reset(self):
         self.dead = False
         self.pos = self.original_pos
-        self.heading = 0
+        self.heading = self.original_theta
         self.turning = None
 
 
@@ -193,9 +195,6 @@ def main():
     pygame.display.init()
     pygame.font.init()
 
-    player = Player()
-    players = [player]
-
     recent_rects = FifoQueue()
 
     # Set up display
@@ -219,6 +218,13 @@ def main():
 
     countdown = CountdownState()
 
+    # Players
+    colors = ColorWheel()
+    players = [random_player_from_screen_rect(DISPLAY.get_rect(), colors.next())
+               for _ in range(1)]
+    player = players[0]
+
+    # Game Loop
     start_ticks = pygame.time.get_ticks()
     exit = False
     show_collision_mask = False
@@ -245,7 +251,7 @@ def main():
 
         for p in players:
             if not p.is_dead():
-                player.update(speed=2)
+                p.update(speed=2)
 
         # Generate the new rectangles for each player
         rts = [p.rect(6) for p in players if not p.is_dead()]
