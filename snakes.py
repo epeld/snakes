@@ -28,10 +28,10 @@ def are_same_color(c1, c2):
 def rect_corners(rect):
     x, y, w, h = rect
     return [
-        (x, y),
-        (x + w, y),
-        (x, y + h),
-        (x + w, y + h)
+        (x+1, y+1),
+        (x + w-1, y+1),
+        (x+1, y + h-1),
+        (x + w-1, y + h-1)
     ]
 
 class VaryingWormStateInterval(object):
