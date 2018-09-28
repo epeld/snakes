@@ -6,6 +6,7 @@ You need:
 Try:
 
 ```
+virtualenv .
 pip install -r requirements.txt
 source bin/activate
 python snakes.py
