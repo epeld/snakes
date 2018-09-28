@@ -56,10 +56,41 @@ class VaryingWormStateInterval(object):
         return self.on
 
 
-class Player(object):
+class ColorWheel(object):
     def __init__(self):
+        self.colors = [
+            pygame.color.Color(255, 0, 0),
+            pygame.color.Color(0, 255, 0),
+            pygame.color.Color(0, 0, 255),
+            pygame.color.Color(100, 100, 100),
+            pygame.color.Color(50, 100, 200),
+            pygame.color.Color(200, 100, 50)
+        ]
+        self.index = 0
+
+    def next(self):
+        ix = self.index % len(self.colors)
+        color = self.colors[ix]
+        self.index += 1
+        return color
+
+color_wheel = ColorWheel()
+
+def random_position_from_screen_rect(rect):
+    center = rect.center
+    radius = 0.8 * min(rect.width, rect.height) / 2
+
+    theta = random.random() * 2 * math.pi
+    x = radius * math.cos(theta)
+    y = radius * math.sin(theta)
+    return (x + center[0], y + center[1])
+
+
+class Player(object):
+    def __init__(self, pos, color):
+        self.original_pos = pos
         self.reset()
-        self.color = pygame.color.Color(100,200,250)
+        self.color = color
         self.state = VaryingWormStateInterval()
 
     def get_color(self):
@@ -111,7 +142,7 @@ class Player(object):
 
     def reset(self):
         self.dead = False
-        self.pos = (50, 100)
+        self.pos = self.original_pos
         self.heading = 0
         self.turning = None
 
