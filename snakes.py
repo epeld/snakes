@@ -236,7 +236,7 @@ def main():
     # Players
     colors = ColorWheel()
     players = [random_player_from_screen_rect(DISPLAY.get_rect(), colors.next())
-               for _ in range(1)]
+               for _ in range(2)]
     player = players[0]
 
     # Game Loop
