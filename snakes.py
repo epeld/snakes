@@ -315,6 +315,9 @@ def main():
             for pt in rect_corners(rt):
                 x = int(pt[0])
                 y = int(pt[1])
+                if x < 0 or y < 0 or x >= DISPLAY.get_width() or y >= DISPLAY.get_height():
+                    p.set_dead(True)
+                    break
                 color = COLLISION_MASK.get_at((x, y))
                 if not are_same_color(color, WHITE):
                     BACKBUFFER.fill((250,0,0), (x, y, 3, 3))
