@@ -3,6 +3,8 @@ import random
 import math
 from pygame.locals import *
 
+WORM_SIZE = 6
+
 WHITE=pygame.color.Color(255,255,255)
 BLACK=pygame.color.Color(0,0,0)
 TRANSPARENT_COLOR=pygame.color.Color(255,255,255, 0)
@@ -86,6 +88,16 @@ def random_player_from_screen_rect(rect, color):
     pos = (x + center[0], y + center[1])
     return Player(pos, theta + math.pi, color)
 
+class WormRect(object):
+    def __init__(self, rect, player):
+        self.rect = rect
+        self.player = player
+
+    def get_player(self):
+        return self.player
+
+    def get_rect(self):
+        return self.rect
 
 class Player(object):
     def __init__(self, pos, theta, color):
@@ -122,10 +134,13 @@ class Player(object):
                 self.heading += 0.05
         return self.pos
 
-    def rect(self, size):
+    def get_worm_rect(self, size):
         x = self.pos[0] - size/2
         y = self.pos[1] - size/2
-        return (x, y, size, size)
+        return WormRect(
+            (x, y, size, size),
+            self
+        )
 
     def turn_left(self):
         self.turning = 'LEFT'
@@ -254,26 +269,30 @@ def main():
                 p.update(speed=2)
 
         # Generate the new rectangles for each player
-        rts = [p.rect(6) for p in players if not p.is_dead()]
+        rts = [p.get_worm_rect(WORM_SIZE) for p in players if not p.is_dead()]
         recent_rects.put(rts)
 
         # player rects older than 10 generations get
         # "persisted" to screen bitmap
         if recent_rects.size() > 10:
             oldest_player_rects = recent_rects.get()
-            for rt in oldest_player_rects:
-                if player.is_hole():
-                    c = player.get_hole_color()
+            for wrt in oldest_player_rects:
+                p = wrt.get_player()
+                rt = wrt.get_rect()
+                if p.is_hole():
+                    c = p.get_hole_color()
                 else:
-                    c = player.get_color()
+                    c = p.get_color()
                     COLLISION_MASK.fill(BLACK, rt)
                 BACKBUFFER.fill(c, rt)
 
         # redraw overlay
         TEMPORARY_RECTS.fill(TRANSPARENT_COLOR)
         for generation in recent_rects.get_items():
-            for rt in generation:
-                c = player.get_head_color()
+            for wrt in generation:
+                rt = wrt.get_rect()
+                p = wrt.get_player()
+                c = p.get_head_color()
                 TEMPORARY_RECTS.fill(c, rt)
 
         if show_collision_mask:
@@ -292,6 +311,7 @@ def main():
         for p in players:
             if p.is_dead():
                 continue
+            rt = p.get_worm_rect(WORM_SIZE).get_rect()
             for pt in rect_corners(rt):
                 x = int(pt[0])
                 y = int(pt[1])
