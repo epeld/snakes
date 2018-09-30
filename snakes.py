@@ -119,6 +119,15 @@ class Player(object):
     def is_hole(self):
         return not self.state.is_on()
 
+    def turn(self, direction, start=False):
+        if direction not in ['LEFT', 'RIGHT']:
+            raise "Direction must be 'LEFT' or 'RIGHT'"
+        if not start:
+            if self.turning == direction:
+                self.stop_turning()
+        else:
+            self.turning = direction
+
     def update(self, speed):
         self.state.update()
         dx = math.cos(self.heading) * speed
@@ -141,12 +150,6 @@ class Player(object):
             (x, y, size, size),
             self
         )
-
-    def turn_left(self):
-        self.turning = 'LEFT'
-
-    def turn_right(self):
-        self.turning = 'RIGHT'
 
     def stop_turning(self):
         self.turning = None
@@ -206,6 +209,15 @@ class CountdownState(object):
             return INITIAL_COUNT
         return max(0, INITIAL_COUNT - math.ceil((updated_time - self.start_time) / 1000))
 
+class TurnCommand(object):
+    def __init__(self, player, direction, start=True):
+        self.start = start
+        self.player = player
+        self.direction = direction
+
+    def perform(self):
+        self.player.turn(self.direction, self.start)
+
 def main():
     pygame.display.init()
     pygame.font.init()
@@ -244,6 +256,7 @@ def main():
     exit = False
     show_collision_mask = False
     while not exit:
+        worm_commands = []
         current_time = pygame.time.get_ticks()
         for event in pygame.event.get():
             if event.type==QUIT:
@@ -251,9 +264,9 @@ def main():
                 sys.exit()
             if event.type == KEYDOWN:
                 if event.key == K_LEFT:
-                    player.turn_left()
+                    worm_commands.append(TurnCommand(player, 'LEFT'))
                 elif event.key == K_RIGHT:
-                    player.turn_right()
+                    worm_commands.append(TurnCommand(player, 'RIGHT'))
                 elif event.key == K_SPACE:
                     DISPLAY.fill(BACKGROUND_COLOR)
                     player.reset()
@@ -262,7 +275,13 @@ def main():
                 elif event.key == K_TAB:
                     show_collision_mask = not show_collision_mask
             elif event.type == KEYUP:
-                player.stop_turning()
+                if event.key == K_LEFT:
+                    worm_commands.append(TurnCommand(player, 'LEFT', False))
+                elif event.key == K_RIGHT:
+                    worm_commands.append(TurnCommand(player, 'RIGHT', False))
+
+        for c in worm_commands:
+            c.perform()
 
         for p in players:
             if not p.is_dead():
