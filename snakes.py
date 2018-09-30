@@ -3,6 +3,11 @@ import random
 import math
 from pygame.locals import *
 
+LOCAL_KEYS = [
+    (K_LEFT, K_RIGHT),
+    (K_a, K_d)
+]
+
 WORM_SIZE = 6
 
 WHITE=pygame.color.Color(255,255,255)
@@ -57,6 +62,15 @@ class VaryingWormStateInterval(object):
     def is_on(self):
         return self.on
 
+
+def find_worm_command(players, event):
+    for p, k in zip(players, LOCAL_KEYS):
+        is_keydown = event.type == KEYDOWN
+        if event.key == k[0]:
+            return TurnCommand(p, 'LEFT', is_keydown)
+        elif event.key == k[1]:
+            return TurnCommand(p, 'RIGHT', is_keydown)
+    return None
 
 class ColorWheel(object):
     def __init__(self):
@@ -263,22 +277,21 @@ def main():
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    worm_commands.append(TurnCommand(player, 'LEFT'))
-                elif event.key == K_RIGHT:
-                    worm_commands.append(TurnCommand(player, 'RIGHT'))
-                elif event.key == K_SPACE:
+                if event.key == K_SPACE:
                     DISPLAY.fill(BACKGROUND_COLOR)
                     player.reset()
                 elif event.key == K_ESCAPE:
                     exit = True
                 elif event.key == K_TAB:
                     show_collision_mask = not show_collision_mask
+                else:
+                    command = find_worm_command(players, event)
+                    if command:
+                        worm_commands.append(command)
             elif event.type == KEYUP:
-                if event.key == K_LEFT:
-                    worm_commands.append(TurnCommand(player, 'LEFT', False))
-                elif event.key == K_RIGHT:
-                    worm_commands.append(TurnCommand(player, 'RIGHT', False))
+                command = find_worm_command(players, event)
+                if command:
+                    worm_commands.append(command)
 
         for c in worm_commands:
             c.perform()
